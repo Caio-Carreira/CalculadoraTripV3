@@ -17,7 +17,7 @@ try:
 except:
     locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252')
 
-# Estilo premium
+# Estilo simplificado e clean
 st.markdown("""
     <style>
         :root {
@@ -38,9 +38,6 @@ st.markdown("""
             margin: 0 5px;
             transition: all 0.3s;
         }
-        .stTabs [data-baseweb="tab"]:hover {
-            background-color: #e9ecef;
-        }
         .stTabs [aria-selected="true"] {
             background-color: var(--primary);
             color: white !important;
@@ -52,9 +49,6 @@ st.markdown("""
         .dataframe th {
             background-color: var(--primary) !important;
             color: white !important;
-        }
-        .dataframe td {
-            background-color: #f8f9fa;
         }
         .stButton>button {
             background-color: var(--primary);
@@ -78,26 +72,25 @@ st.markdown("""
             font-weight: 600;
             transition: 0.3s;
         }
-        .stDownloadButton>button:hover {
-            background-color: #146c43;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .relatorio-container {
-            background-color: #f8f9fa;
-            padding: 20px;
+        .total-box {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
             border-radius: 10px;
             margin: 20px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .relatorio-dia {
+        .day-section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .relatorio-line {
             font-family: 'Consolas', monospace;
             font-size: 15px;
-            margin-bottom: 10px;
-            padding: 8px;
-            background-color: white;
-            border-radius: 6px;
-            border-left: 4px solid var(--primary);
+            margin-bottom: 8px;
+            padding: 5px 0;
         }
         .relatorio-total {
             font-family: 'Segoe UI', sans-serif;
@@ -109,23 +102,6 @@ st.markdown("""
             color: white;
             border-radius: 6px;
             text-align: center;
-        }
-        .total-box {
-            background-color: var(--primary);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px 0;
-            text-align: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .day-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            border-left: 4px solid var(--primary);
         }
     </style>
 """, unsafe_allow_html=True)
@@ -168,12 +144,12 @@ def calcular_gasto_linha(dado, valores, deslocamento_valor, datas_deslocamento):
     return row
 
 # Título principal
-st.title("✈️ Calculadora Premium de Despesas de Viagem")
+st.title("✈️ Calculadora de Despesas de Viagem")
 
 # Abas principais
 tabs = st.tabs(["📋 Preenchimento de Dias", "📊 Relatório Completo"])
 
-# Sidebar premium
+# Sidebar
 with st.sidebar:
     st.markdown("""
     <div style="text-align:center; margin-bottom:30px;">
@@ -246,56 +222,52 @@ with tabs[0]:
             nome_dia_pt = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"][data.weekday()]
             fim_de_semana = nome_dia_pt in ["Sábado", "Domingo"]
 
-            with st.expander(f"{dia_formatado} ({nome_dia_pt})", expanded=False):
-                with st.container():
-                    st.markdown(f'<div class="day-card">', unsafe_allow_html=True)
-                    
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        cafe = st.checkbox("☕ Café da manhã", key=f"cafe_{dia_formatado}")
-                        jantar = st.checkbox("🌙 Jantar", key=f"jantar_{dia_formatado}")
-                        frigobar = st.checkbox("🧊 Frigobar", key=f"frigobar_{dia_formatado}")
-                        lavanderia = st.checkbox("👕 Lavanderia", key=f"lavanderia_{dia_formatado}")
-                        
-                        # Checkbox de feriado como última opção
-                        feriado = st.checkbox("🎉 Feriado", key=f"feriado_{dia_formatado}")
-                        
-                        # Lógica para checkboxes de almoço
-                        almoco = False
-                        almoco_feriado = False
-                        
-                        if fim_de_semana:
-                            if feriado:
-                                almoco_feriado = st.checkbox("🍽️ Almoço Feriado FDS", key=f"almoco_feriado_fds_{dia_formatado}")
-                            else:
-                                almoco = st.checkbox("🍽️ Almoço (FDS)", key=f"almoco_{dia_formatado}")
-                        elif feriado:
-                            almoco_feriado = st.checkbox("🍽️ Almoço Feriado Dia Útil", key=f"almoco_feriado_{dia_formatado}")
-
-                    # Define o tipo do dia
-                    if feriado and fim_de_semana:
-                        tipo_dia = "Feriado final de semana"
-                    elif feriado:
-                        tipo_dia = "Feriado dia útil"
+            st.markdown(f"### {dia_formatado} ({nome_dia_pt})")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                cafe = st.checkbox("☕ Café da manhã", key=f"cafe_{dia_formatado}")
+                jantar = st.checkbox("🌙 Jantar", key=f"jantar_{dia_formatado}")
+                frigobar = st.checkbox("🧊 Frigobar", key=f"frigobar_{dia_formatado}")
+                lavanderia = st.checkbox("👕 Lavanderia", key=f"lavanderia_{dia_formatado}")
+                
+                # Checkbox de feriado como última opção
+                feriado = st.checkbox("🎉 Feriado", key=f"feriado_{dia_formatado}")
+                
+                # Lógica para checkboxes de almoço
+                almoco = False
+                almoco_feriado = False
+                
+                if fim_de_semana:
+                    if feriado:
+                        almoco_feriado = st.checkbox("🍽️ Almoço Feriado FDS", key=f"almoco_feriado_fds_{dia_formatado}")
                     else:
-                        tipo_dia = nome_dia_pt if fim_de_semana else "Dia útil"
+                        almoco = st.checkbox("🍽️ Almoço (FDS)", key=f"almoco_{dia_formatado}")
+                elif feriado:
+                    almoco_feriado = st.checkbox("🍽️ Almoço Feriado Dia Útil", key=f"almoco_feriado_{dia_formatado}")
 
-                    dias.append({
-                        "dia": dia_formatado,
-                        "tipo": tipo_dia,
-                        "cafe": cafe,
-                        "almoco": almoco,
-                        "almoco_feriado": almoco_feriado,
-                        "jantar": jantar,
-                        "frigobar": frigobar,
-                        "deslocamento": False,
-                        "lavanderia": lavanderia
-                    })
-                    
-                    st.markdown('</div>', unsafe_allow_html=True)
+            # Define o tipo do dia
+            if feriado and fim_de_semana:
+                tipo_dia = "Feriado final de semana"
+            elif feriado:
+                tipo_dia = "Feriado dia útil"
+            else:
+                tipo_dia = nome_dia_pt if fim_de_semana else "Dia útil"
 
-        st.markdown("---")
-        
+            dias.append({
+                "dia": dia_formatado,
+                "tipo": tipo_dia,
+                "cafe": cafe,
+                "almoco": almoco,
+                "almoco_feriado": almoco_feriado,
+                "jantar": jantar,
+                "frigobar": frigobar,
+                "deslocamento": False,
+                "lavanderia": lavanderia
+            })
+
+            st.markdown("---")
+
         # Seção de deslocamentos
         st.markdown("""
         <div style="text-align:center; margin-bottom:20px;">
@@ -354,43 +326,38 @@ with tabs[1]:
         resumo.columns = ['Categoria', 'Total']
         st.bar_chart(resumo.set_index('Categoria'))
         
-        # Relatório descritivo
+        # Relatório descritivo simplificado
         st.markdown("---")
         st.markdown("### 📝 Relatório Descritivo")
         
-        with st.container():
-            st.markdown('<div class="relatorio-container">', unsafe_allow_html=True)
+        texto_relatorio = []
+        for linha in df.itertuples():
+            partes = [f"<div class='relatorio-line'>{linha.Dia} –"]
+            if linha.Café > 0:
+                partes.append(f"+ ☕ Café da manhã {formatar_moeda(linha.Café)}")
+            if linha.Almoço > 0:
+                partes.append(f"+ 🍽️ Almoço {formatar_moeda(linha.Almoço)}")
+            if linha.Jantar > 0:
+                partes.append(f"+ 🌙 Jantar {formatar_moeda(linha.Jantar)}")
+            if linha.Frigobar > 0:
+                partes.append(f"+ 🧊 Frigobar {formatar_moeda(linha.Frigobar)}")
+            if linha.Lavanderia > 0:
+                partes.append(f"+ 👕 Lavanderia {formatar_moeda(linha.Lavanderia)}")
+            if linha.Deslocamento > 0:
+                partes.append(f"+ 🚗 Deslocamento {formatar_moeda(linha.Deslocamento)}")
             
-            texto_relatorio = []
-            for linha in df.itertuples():
-                partes = [f"<div class='relatorio-dia'>{linha.Dia} –"]
-                if linha.Café > 0:
-                    partes.append(f"+ ☕ Café da manhã {formatar_moeda(linha.Café)}")
-                if linha.Almoço > 0:
-                    partes.append(f"+ 🍽️ Almoço {formatar_moeda(linha.Almoço)}")
-                if linha.Jantar > 0:
-                    partes.append(f"+ 🌙 Jantar {formatar_moeda(linha.Jantar)}")
-                if linha.Frigobar > 0:
-                    partes.append(f"+ 🧊 Frigobar {formatar_moeda(linha.Frigobar)}")
-                if linha.Lavanderia > 0:
-                    partes.append(f"+ 👕 Lavanderia {formatar_moeda(linha.Lavanderia)}")
-                if linha.Deslocamento > 0:
-                    partes.append(f"+ 🚗 Deslocamento {formatar_moeda(linha.Deslocamento)}")
-                
-                partes.append(f"= {formatar_moeda(linha.Total)}")
-                partes.append("</div>")
-                texto_relatorio.append(" ".join(partes))
-            
-            st.markdown("\n".join(texto_relatorio), unsafe_allow_html=True)
-            
-            # Total do período
-            total_geral = df["Total"].sum()
-            st.markdown(
-                f"<div class='relatorio-total'>Total do Período: {formatar_moeda(total_geral)}</div>",
-                unsafe_allow_html=True
-            )
-            
-            st.markdown('</div>', unsafe_allow_html=True)
+            partes.append(f"= {formatar_moeda(linha.Total)}")
+            partes.append("</div>")
+            texto_relatorio.append(" ".join(partes))
+        
+        st.markdown("\n".join(texto_relatorio), unsafe_allow_html=True)
+        
+        # Total do período
+        total_geral = df["Total"].sum()
+        st.markdown(
+            f"<div class='relatorio-total'>Total do Período: {formatar_moeda(total_geral)}</div>",
+            unsafe_allow_html=True
+        )
         
         # Exportação de dados
         st.markdown("---")
@@ -424,8 +391,7 @@ with tabs[1]:
                 label="⬇️ Baixar Relatório (TXT)",
                 data="\n".join(texto_exportacao),
                 file_name="relatorio_viagem.txt",
-                mime="text/plain",
-                help="Baixe o relatório completo em formato de texto"
+                mime="text/plain"
             )
         
         with col2:
@@ -433,6 +399,5 @@ with tabs[1]:
                 label="⬇️ Baixar Dados (CSV)",
                 data=df.to_csv(index=False),
                 file_name="dados_viagem.csv",
-                mime="text/csv",
-                help="Baixe os dados completos em formato CSV para Excel"
+                mime="text/csv"
             )
