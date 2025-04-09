@@ -59,23 +59,6 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Lista de feriados (pode ser expandida)
-feriados_brasil = [
-    "01/01", # Ano Novo
-    "21/04", # Tiradentes
-    "01/05", # Dia do Trabalho
-    "07/09", # Independência
-    "12/10", # Nossa Senhora Aparecida
-    "02/11", # Finados
-    "15/11", # Proclamação da República
-    "25/12"  # Natal
-]
-
-# Função para verificar feriados
-def verificar_feriado(data):
-    data_str = data.strftime("%d/%m")
-    return data_str in feriados_brasil
-
 # Função para formatar moeda
 def formatar_moeda(valor):
     return locale.currency(valor, grouping=True, symbol=False)
@@ -179,30 +162,33 @@ with tabs[0]:
             dia_formatado = data.strftime("%d/%m/%Y")
             nome_dia_pt = ["Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado", "Domingo"][data.weekday()]
             fim_de_semana = nome_dia_pt in ["Sábado", "Domingo"]
-            feriado = verificar_feriado(data)
 
             st.markdown(f"### {dia_formatado} ({nome_dia_pt})")
-            if feriado:
-                st.markdown("🎉 **Feriado Nacional**")
             
             col1, col2 = st.columns(2)
             with col1:
                 cafe = st.checkbox("☕ Café da manhã", key=f"cafe_{dia_formatado}")
-
-                almoco = False
-                almoco_feriado = False
-
-                if fim_de_semana:
-                    almoco = st.checkbox("🍽️ Almoço (FDS)", key=f"almoco_{dia_formatado}")
-                elif feriado:
-                    almoco_feriado = st.checkbox("🍽️ Almoço Feriado", key=f"almoco_feriado_{dia_formatado}")
-                else:
-                    almoco = st.checkbox("🍽️ Almoço (dia útil)", key=f"almoco_{dia_formatado}")
-
                 jantar = st.checkbox("🌙 Jantar", key=f"jantar_{dia_formatado}")
                 frigobar = st.checkbox("🧊 Frigobar", key=f"frigobar_{dia_formatado}")
                 lavanderia = st.checkbox("👕 Lavanderia", key=f"lavanderia_{dia_formatado}")
+                
+                # Checkbox de feriado (agora como última opção)
+                feriado = st.checkbox("🎉 Feriado", key=f"feriado_{dia_formatado}")
+                
+                # Lógica para checkboxes de almoço conforme solicitado
+                almoco = False
+                almoco_feriado = False
+                
+                # Almoço só aparece em finais de semana ou feriados
+                if fim_de_semana:
+                    if feriado:
+                        almoco_feriado = st.checkbox("🍽️ Almoço Feriado FDS", key=f"almoco_feriado_fds_{dia_formatado}")
+                    else:
+                        almoco = st.checkbox("🍽️ Almoço (FDS)", key=f"almoco_{dia_formatado}")
+                elif feriado:
+                    almoco_feriado = st.checkbox("🍽️ Almoço Feriado Dia Útil", key=f"almoco_feriado_{dia_formatado}")
 
+            # Define o tipo do dia
             if feriado and fim_de_semana:
                 tipo_dia = "Feriado final de semana"
             elif feriado:
@@ -231,6 +217,7 @@ with tabs[0]:
             datas_deslocamento.append(data_deslocamento.strftime("%d/%m/%Y"))
 
 # ------------------- RELATÓRIO -------------------
+
 with tabs[1]:
     st.subheader("📊 Relatório de Gastos")
     if not dias:
@@ -240,6 +227,7 @@ with tabs[1]:
         df = pd.DataFrame(linhas)
         
         # Formatação do DataFrame para exibição
+        st.markdown("### 📋 Dados Consolidados")
         df_display = df.copy()
         for col in df_display.columns[2:]:
             df_display[col] = df_display[col].apply(lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
@@ -247,52 +235,113 @@ with tabs[1]:
         st.dataframe(df_display, use_container_width=True)
         
         total_geral = df["Total"].sum()
-        st.markdown(f"## 💰 Total de Despesas: R$ {total_geral:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+        st.markdown(f"### 💰 Total de Despesas: R$ {total_geral:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
         
         # Gráfico de resumo
         st.markdown("---")
-        st.subheader("📈 Resumo por Categoria")
+        st.markdown("### 📈 Resumo por Categoria")
         resumo = df[['Café', 'Almoço', 'Jantar', 'Frigobar', 'Lavanderia', 'Deslocamento']].sum().reset_index()
         resumo.columns = ['Categoria', 'Total']
         st.bar_chart(resumo.set_index('Categoria'))
         
-        # Relatório descritivo melhorado
+        # Relatório descritivo no formato solicitado - agora em uma seção separada
         st.markdown("---")
-        st.subheader("📝 Relatório Descritivo")
-        texto_relatorio = ["### Detalhamento por Dia\n"]
+        st.markdown("### 📝 Relatório Descritivo")
         
-        for linha in df.itertuples():
-            partes = [f"**{linha.Dia}** ({linha.Tipo}):"]
-            itens = []
-            if linha.Deslocamento > 0:
-                itens.append(f"🚗 Deslocamento (R$ {linha.Deslocamento:,.2f})".replace(",", "X").replace(".", ",").replace("X", "."))
-            if linha.Café > 0:
-                itens.append(f"☕ Café (R$ {linha.Café:,.2f})".replace(",", "X").replace(".", ",").replace("X", "."))
-            if linha.Almoço > 0:
-                itens.append(f"🍽️ Almoço (R$ {linha.Almoço:,.2f})".replace(",", "X").replace(".", ",").replace("X", "."))
-            if linha.Jantar > 0:
-                itens.append(f"🌙 Jantar (R$ {linha.Jantar:,.2f})".replace(",", "X").replace(".", ",").replace("X", "."))
-            if linha.Frigobar > 0:
-                itens.append(f"🧊 Frigobar (R$ {linha.Frigobar:,.2f})".replace(",", "X").replace(".", ",").replace("X", "."))
-            if linha.Lavanderia > 0:
-                itens.append(f"👕 Lavanderia (R$ {linha.Lavanderia:,.2f})".replace(",", "X").replace(".", ",").replace("X", "."))
+        # Container com estilo para o relatório
+        st.markdown("""
+        <style>
+            .relatorio-container {
+                background-color: #f8f9fa;
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+            .relatorio-dia {
+                font-family: 'Arial', sans-serif;
+                font-size: 15px;
+                margin-bottom: 8px;
+            }
+            .relatorio-total {
+                font-family: 'Arial', sans-serif;
+                font-size: 16px;
+                font-weight: bold;
+                margin-top: 15px;
+            }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Container do relatório
+        with st.container():
+            st.markdown('<div class="relatorio-container">', unsafe_allow_html=True)
             
-            partes.append(" + ".join(itens))
-            partes.append(f"→ **Total: R$ {linha.Total:,.2f}**".replace(",", "X").replace(".", ",").replace("X", "."))
-            texto_relatorio.append(" ".join(partes))
+            texto_relatorio = []
+            for linha in df.itertuples():
+                partes = [f"<div class='relatorio-dia'>{linha.Dia} –"]
+                if linha.Café > 0:
+                    partes.append(f"+ ☕ Café da manhã R$ {linha.Café:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Almoço > 0:
+                    partes.append(f"+ 🍽️ Almoço R$ {linha.Almoço:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Jantar > 0:
+                    partes.append(f"+ 🌙 Jantar R$ {linha.Jantar:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Frigobar > 0:
+                    partes.append(f"+ 🧊 Frigobar R$ {linha.Frigobar:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Lavanderia > 0:
+                    partes.append(f"+ 👕 Lavanderia R$ {linha.Lavanderia:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Deslocamento > 0:
+                    partes.append(f"+ 🚗 Deslocamento R$ {linha.Deslocamento:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                
+                partes.append(f"= R$ {linha.Total:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                partes.append("</div>")
+                texto_relatorio.append(" ".join(partes))
+            
+            # Exibe o relatório formatado
+            st.markdown("\n".join(texto_relatorio), unsafe_allow_html=True)
+            
+            # Total do período
+            st.markdown(
+                f"<div class='relatorio-total'>Total do Período: R$ {total_geral:,.2f}</div>"
+                .replace(",", "X").replace(".", ",").replace("X", "."), 
+                unsafe_allow_html=True
+            )
+            
+            st.markdown('</div>', unsafe_allow_html=True)
         
-        texto_relatorio.append(f"\n### Total do Período: R$ {total_geral:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
-        st.markdown("\n\n".join(texto_relatorio))
+        # Opções de exportação (texto puro para o arquivo)
+        st.markdown("---")
+        st.markdown("### 💾 Exportar Dados")
         
-        # Opções de exportação
         col1, col2 = st.columns(2)
         with col1:
+            # Preparar texto para exportação
+            texto_exportacao = []
+            for linha in df.itertuples():
+                partes = [f"{linha.Dia} –"]
+                if linha.Café > 0:
+                    partes.append(f"+ ☕ Café da manhã R$ {linha.Café:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Almoço > 0:
+                    partes.append(f"+ 🍽️ Almoço R$ {linha.Almoço:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Jantar > 0:
+                    partes.append(f"+ 🌙 Jantar R$ {linha.Jantar:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Frigobar > 0:
+                    partes.append(f"+ 🧊 Frigobar R$ {linha.Frigobar:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Lavanderia > 0:
+                    partes.append(f"+ 👕 Lavanderia R$ {linha.Lavanderia:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                if linha.Deslocamento > 0:
+                    partes.append(f"+ 🚗 Deslocamento R$ {linha.Deslocamento:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                
+                partes.append(f"= R$ {linha.Total:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+                texto_exportacao.append(" ".join(partes))
+            
+            texto_exportacao.append(f"\nTotal do Período: R$ {total_geral:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+            
             st.download_button(
                 label="⬇️ Baixar Relatório (TXT)",
-                data="\n".join(texto_relatorio),
+                data="\n".join(texto_exportacao),
                 file_name="relatorio_viagem.txt",
                 mime="text/plain"
             )
+        
         with col2:
             st.download_button(
                 label="⬇️ Baixar Dados (CSV)",
