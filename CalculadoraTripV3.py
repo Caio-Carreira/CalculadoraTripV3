@@ -18,6 +18,7 @@ except locale.Error:
     try:
         locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252')
     except locale.Error:
+        pass  # Ignora o erro se nenhuma das opções funcionar
 
 # Estilo simplificado e clean
 st.markdown("""
