@@ -133,7 +133,7 @@ st.markdown("""
 
 # Funções auxiliares
 def formatar_moeda(valor):
-    return locale.currency(valor, grouping=True, symbol=True)
+    return f"R$ {valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 def calcular_gasto_linha(dado, valores, deslocamento_valor, datas_deslocamento):
     # Verifica se é dia de deslocamento
