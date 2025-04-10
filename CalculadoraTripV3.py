@@ -8,7 +8,7 @@ import locale
 st.set_page_config(
     page_title=" 🖩 Calculadora Trip Premium", 
     layout="wide",
-    page_icon="✈️"
+    page_icon="🖩"
 )
 
 # Configurar locale para português
@@ -83,14 +83,14 @@ st.markdown("""
         }
         .day-section {
             margin-bottom: 25px;
-            padding-bottom: 15px;
+            padding-bottom: 5px;
             border-bottom: 1px solid #e9ecef;
         }
         .relatorio-line {
             font-family: 'Consolas', monospace;
             font-size: 15px;
             margin-bottom: 8px;
-            padding: 5px 0;
+            padding: 1px 0;
         }
         .relatorio-total {
             font-family: 'Segoe UI', sans-serif;
@@ -103,6 +103,28 @@ st.markdown("""
             border-radius: 6px;
             text-align: center;
         }
+             .total-destaque {
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 25px 0;
+            padding: 15px;
+            color: #0d3b66;
+            text-align: center;
+            border-bottom: 3px solid #0d3b66;
+            border-top: 3px solid #0d3b66;
+        }
+            .total-header {
+            font-family: 'Consolas', monospace;
+            font-size: 40px;
+            font-weight: 500;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -111,6 +133,7 @@ def formatar_moeda(valor):
     return locale.currency(valor, grouping=True, symbol=True)
 
 def calcular_gasto_linha(dado, valores, deslocamento_valor, datas_deslocamento):
+    # Verifica se é dia de deslocamento
     deslocamento = deslocamento_valor if (dado["dia"] in datas_deslocamento) else 0
     
     # Calcula almoço
@@ -144,7 +167,7 @@ def calcular_gasto_linha(dado, valores, deslocamento_valor, datas_deslocamento):
     return row
 
 # Título principal
-st.title("✈️ Calculadora de Despesas de Viagem")
+st.title("🖩 Calculadora de Despesas de Viagem")
 
 # Abas principais
 tabs = st.tabs(["📋 Preenchimento de Dias", "📊 Relatório Completo"])
@@ -254,6 +277,9 @@ with tabs[0]:
             else:
                 tipo_dia = nome_dia_pt if fim_de_semana else "Dia útil"
 
+            # Marca deslocamento se a data estiver na lista de deslocamentos
+            tem_deslocamento = dia_formatado in datas_deslocamento
+
             dias.append({
                 "dia": dia_formatado,
                 "tipo": tipo_dia,
@@ -262,7 +288,7 @@ with tabs[0]:
                 "almoco_feriado": almoco_feriado,
                 "jantar": jantar,
                 "frigobar": frigobar,
-                "deslocamento": False,
+                "deslocamento": tem_deslocamento,  # Agora marcando corretamente
                 "lavanderia": lavanderia
             })
 
@@ -293,75 +319,51 @@ with tabs[0]:
             <div class="total-box">
                 <h3>💰 Total Estimado</h3>
                 <h2>{formatar_moeda(total_geral)}</h2>
-                <p style="font-size:14px; margin-bottom:0;">Consulte a aba de Relatório para detalhes</p>
+                <p style="font-size:14px; margin-bottom:0;">Incluindo deslocamentos: {len(datas_deslocamento)}</p>
             </div>
             """, unsafe_allow_html=True)
 
 # ------------------- RELATÓRIO COMPLETO -------------------
 with tabs[1]:
-    st.markdown("""
-    <div style="text-align:center; margin-bottom:30px;">
-        <h2>📊 Relatório Completo de Gastos</h2>
-    </div>
-    """, unsafe_allow_html=True)
     
     if not dias:
         st.info("ℹ️ Nenhum dado preenchido ainda. Preencha os dados na aba 'Preenchimento de Dias'.")
     else:
         linhas = [calcular_gasto_linha(dia, valores, valor_deslocamento, datas_deslocamento) for dia in dias]
         df = pd.DataFrame(linhas)
-        
-        # Dados consolidados
-        st.markdown("### 📋 Dados Consolidados")
-        df_display = df.copy()
-        for col in df_display.columns[2:]:
-            df_display[col] = df_display[col].apply(lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
-        
-        st.dataframe(df_display, use_container_width=True)
-        
-        # Gráfico de resumo
-        st.markdown("---")
-        st.markdown("### 📈 Resumo por Categoria")
-        resumo = df[['Café', 'Almoço', 'Jantar', 'Frigobar', 'Lavanderia', 'Deslocamento']].sum().reset_index()
-        resumo.columns = ['Categoria', 'Total']
-        st.bar_chart(resumo.set_index('Categoria'))
-        
+
+        # Total do período
+        total_geral = df["Total"].sum()
+        st.markdown(
+    f"<div class='total-header'>💰 Total de Despesas: {formatar_moeda(total_geral)}</div>", 
+    unsafe_allow_html=True
+        )
+
         # Relatório descritivo simplificado
         st.markdown("---")
-        st.markdown("### 📝 Relatório Descritivo")
+        st.markdown("### 📝 Relatório Descritivo de Despesas")
         
         texto_relatorio = []
         for linha in df.itertuples():
             partes = [f"<div class='relatorio-line'>{linha.Dia} –"]
             if linha.Café > 0:
-                partes.append(f"+ ☕ Café da manhã {formatar_moeda(linha.Café)}")
+                partes.append(f"+☕Café da manhã{formatar_moeda(linha.Café)}")
             if linha.Almoço > 0:
-                partes.append(f"+ 🍽️ Almoço {formatar_moeda(linha.Almoço)}")
+                partes.append(f"+🍽️Almoço{formatar_moeda(linha.Almoço)}")
             if linha.Jantar > 0:
-                partes.append(f"+ 🌙 Jantar {formatar_moeda(linha.Jantar)}")
+                partes.append(f"+🌙Jantar{formatar_moeda(linha.Jantar)}")
             if linha.Frigobar > 0:
-                partes.append(f"+ 🧊 Frigobar {formatar_moeda(linha.Frigobar)}")
+                partes.append(f"+🧊Frigobar{formatar_moeda(linha.Frigobar)}")
             if linha.Lavanderia > 0:
-                partes.append(f"+ 👕 Lavanderia {formatar_moeda(linha.Lavanderia)}")
+                partes.append(f"+👕Lavanderia{formatar_moeda(linha.Lavanderia)}")
             if linha.Deslocamento > 0:
-                partes.append(f"+ 🚗 Deslocamento {formatar_moeda(linha.Deslocamento)}")
+                partes.append(f"+🚗Deslocamento{formatar_moeda(linha.Deslocamento)}")
             
             partes.append(f"= {formatar_moeda(linha.Total)}")
             partes.append("</div>")
             texto_relatorio.append(" ".join(partes))
         
         st.markdown("\n".join(texto_relatorio), unsafe_allow_html=True)
-        
-        # Total do período
-        total_geral = df["Total"].sum()
-        st.markdown(
-            f"<div class='relatorio-total'>Total do Período: {formatar_moeda(total_geral)}</div>",
-            unsafe_allow_html=True
-        )
-        
-        # Exportação de dados
-        st.markdown("---")
-        st.markdown("### 💾 Exportar Dados")
         
         col1, col2 = st.columns(2)
         with col1:
@@ -370,22 +372,25 @@ with tabs[1]:
             for linha in df.itertuples():
                 partes = [f"{linha.Dia} –"]
                 if linha.Café > 0:
-                    partes.append(f"+ ☕ Café da manhã {formatar_moeda(linha.Café)}")
+                    partes.append(f"+☕Café da manhã{formatar_moeda(linha.Café)}")
                 if linha.Almoço > 0:
-                    partes.append(f"+ 🍽️ Almoço {formatar_moeda(linha.Almoço)}")
+                    partes.append(f"+🍽️Almoço{formatar_moeda(linha.Almoço)}")
                 if linha.Jantar > 0:
-                    partes.append(f"+ 🌙 Jantar {formatar_moeda(linha.Jantar)}")
+                    partes.append(f"+🌙Jantar{formatar_moeda(linha.Jantar)}")
                 if linha.Frigobar > 0:
-                    partes.append(f"+ 🧊 Frigobar {formatar_moeda(linha.Frigobar)}")
+                    partes.append(f"+🧊Frigobar{formatar_moeda(linha.Frigobar)}")
                 if linha.Lavanderia > 0:
-                    partes.append(f"+ 👕 Lavanderia {formatar_moeda(linha.Lavanderia)}")
+                    partes.append(f"+👕Lavanderia{formatar_moeda(linha.Lavanderia)}")
                 if linha.Deslocamento > 0:
-                    partes.append(f"+ 🚗 Deslocamento {formatar_moeda(linha.Deslocamento)}")
+                    partes.append(f"+🚗Deslocamento{formatar_moeda(linha.Deslocamento)}")
                 
                 partes.append(f"= {formatar_moeda(linha.Total)}")
                 texto_exportacao.append(" ".join(partes))
             
-            texto_exportacao.append(f"\nTotal do Período: {formatar_moeda(total_geral)}")
+            texto_exportacao.append(f"\nTotal do Período: {formatar_moeda(total_geral)} (incluindo {len(datas_deslocamento)} deslocamentos)")
+
+            st.write("")
+            st.write("")
             
             st.download_button(
                 label="⬇️ Baixar Relatório (TXT)",
@@ -394,10 +399,24 @@ with tabs[1]:
                 mime="text/plain"
             )
         
-        with col2:
-            st.download_button(
-                label="⬇️ Baixar Dados (CSV)",
-                data=df.to_csv(index=False),
-                file_name="dados_viagem.csv",
-                mime="text/csv"
-            )
+        st.divider()
+        
+        # Dados consolidados
+        st.markdown("### 📋 Tabela de Despesas")
+        df_display = df.copy()
+        for col in df_display.columns[2:]:
+            df_display[col] = df_display[col].apply(lambda x: f"R$ {x:,.2f}".replace(",", "X").replace(".", ",").replace("X", "."))
+        
+        st.dataframe(df_display, use_container_width=True)
+        
+        
+        # Gráfico de resumo
+        st.markdown("---")
+        st.markdown("### 📈 Resumo por Categoria")
+        resumo = df[['Café', 'Almoço', 'Jantar', 'Frigobar', 'Lavanderia', 'Deslocamento']].sum().reset_index()
+        resumo.columns = ['Categoria', 'Total']
+        st.bar_chart(resumo.set_index('Categoria'))
+        
+        
+        
+        
