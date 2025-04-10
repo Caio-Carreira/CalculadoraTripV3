@@ -14,8 +14,10 @@ st.set_page_config(
 # Configurar locale para português
 try:
     locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
-except:
-    locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252')
+except locale.Error:
+    try:
+        locale.setlocale(locale.LC_ALL, 'Portuguese_Brazil.1252')
+    except locale.Error:
 
 # Estilo simplificado e clean
 st.markdown("""
@@ -417,6 +419,6 @@ with tabs[1]:
         resumo.columns = ['Categoria', 'Total']
         st.bar_chart(resumo.set_index('Categoria'))
         
+              
         
-        
-        
+### Caio Carreira
