@@ -175,7 +175,7 @@ tabs = st.tabs(["📋 Preenchimento de Dias", "📊 Relatório Completo"])
 # Sidebar
 with st.sidebar:
     st.markdown("""
-    <div style="text-align:center; margin-bottom:30px;">
+    <div style="text-align:center; margin-bottom:04px;">
         <h2 style="color:#0d3b66;">⚙️ Configurações</h2>
     </div>
     """, unsafe_allow_html=True)
@@ -183,7 +183,7 @@ with st.sidebar:
     with st.expander("💰 Valores Base", expanded=True):
         valores = {
             "cafe": st.number_input("☕ Café da manhã", value=20.0, min_value=0.0),
-            "almoco_normal": st.number_input("🍽️ Almoço (dia útil)", value=33.0, min_value=0.0),
+            "almoco_normal": st.number_input("🍽️ Almoço (final de semana)", value=33.0, min_value=0.0),
             "almoco_feriado_extra": st.number_input("🍽️ Almoço (feriado dia útil)", value=25.0, min_value=0.0),
             "almoco_feriado_fds": st.number_input("🍽️ Almoço (feriado fim de semana)", value=58.0, min_value=0.0),
             "jantar_normal": st.number_input("🌙 Jantar (normal)", value=40.0, min_value=0.0),
@@ -195,7 +195,7 @@ with st.sidebar:
     st.markdown("---")
     
     with st.expander("🚗 Deslocamento", expanded=True):
-        usa_calculadora = st.checkbox("Usar cálculadora de deslocamento", value=True)
+        usa_calculadora = st.checkbox("Usar cálculadora de deslocamento", value=False)
         if usa_calculadora:
             deslocamento_params = {
                 "distancia_viagem": st.number_input("📍 Distância (km)", value=650, min_value=1),
@@ -218,15 +218,15 @@ with tabs[0]:
     with col_center:
         st.markdown("""
         <div style="text-align:center; margin-bottom:30px;">
-            <h3>📅 Datas da Viagem</h3>
+            <h3> 📅 Informe o Periodo da Viagem </h3>
         </div>
         """, unsafe_allow_html=True)
         
         col1, col2 = st.columns(2)
         with col1:
-            data_inicio = st.date_input("Data de Início", key="data_inicio")
+            data_inicio = st.date_input("Informe a Data de Início da viagem", key="data_inicio")
         with col2:
-            data_fim = st.date_input("Data de Término", key="data_fim")
+            data_fim = st.date_input("Informe a Data de Término da viagem", key="data_fim")
 
     if data_fim < data_inicio:
         st.error("⚠️ A data de término deve ser posterior à data de início.")
@@ -236,7 +236,7 @@ with tabs[0]:
         st.markdown("---")
         st.markdown("""
         <div style="text-align:center; margin-bottom:20px;">
-            <h3>🧾 Preencha os dados para cada dia</h3>
+            <h3>🧾 Preencha as despesas relacionadas a cada dia</h3>
         </div>
         """, unsafe_allow_html=True)
 
