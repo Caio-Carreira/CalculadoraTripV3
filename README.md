@@ -1,3 +1,7 @@
+[![Deploy](https://img.shields.io/badge/🚀_Deploy-Acesse_o_App-4a6fa5?style=for-the-badge&logo=streamlit)](https://calculadoratrip.streamlit.app/)
+
+[**▶️ ACESSE O APP AQUI**](https://calculadoratrip.streamlit.app/)
+
 # **CalculadoraDespesasTrip** 💼✈️  
 **Seu Controle de Despesas de Viagens Corporativas, *Elevado a Outro Nível***  
 
