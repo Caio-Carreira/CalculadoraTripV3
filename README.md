@@ -1,16 +1,16 @@
-[![Deploy](https://img.shields.io/badge/🚀_Deploy-Acesse_o_App-4a6fa5?style=for-the-badge&logo=streamlit)](https://calculadoratrip.streamlit.app/)
+# **CalculadoraDespesasTrip** 💼✈️  
+**Seu Controle de Despesas de Viagens Corporativas, *Elevado a Outro Nível***  
+
 
 [**▶️ ACESSE O APP AQUI**](https://calculadoratrip.streamlit.app/)
 
-# **CalculadoraDespesasTrip** 💼✈️  
-**Seu Controle de Despesas de Viagens Corporativas, *Elevado a Outro Nível***  
 
 ---
 
 ## **✨ Sobre o Projeto**  
-Tá cansado de planilhas manuais, controles confusos e dor de cabeça na hora de fechar despesas de viagem? **A CalculadoraDespesasTrip veio para revolucionar isso!**  
-
-Desenvolvida com **Streamlit**, essa aplicação combina **design moderno, automação inteligente e zero burocracia** para transformar o processo de prestação de contas em algo **rápido, preciso e (incrivelmente) simples**.  
+Tá cansado de planilhas manuais, controles confusos e dor de cabeça na hora de fechar despesas de viagem? 
+**A CalculadoraDespesasTrip veio para revolucionar isso!**  
+Desenvolvida com **Phyton`**, essa aplicação combina **design moderno, automação inteligente e zero burocracia** para transformar o processo de prestação de contas em algo **rápido, preciso e (incrivelmente) simples**.  
 
 🚀 **Missão:**  
 *"Automatizar o tedioso para que você foque no que realmente importa: sua viagem e seus resultados."*  
@@ -35,8 +35,10 @@ Desenvolvida com **Streamlit**, essa aplicação combina **design moderno, autom
 ---
 
 ## **⚙️ Tecnologias Usadas**  
+- **Git Github** (versionamento =)
+- **VsCode** (gosto de codar nele)
 - **Python 3** (porque robustez não se discute)  
-- **Streamlit** (para um frontend clean e poderoso)  
+- **Streamlit** (host para um frontend clean e poderoso)  
 - **Pandas** (tratamento de dados ninja)  
 
 ---
@@ -61,7 +63,7 @@ Desenvolvida com **Streamlit**, essa aplicação combina **design moderno, autom
    ```
 3. **Rode o app:**  
    ```bash
-   streamlit run app.py
+   streamlit run nomedoseuappsalvo.py
    ```
 4. **Pronto!** Acesse no navegador e comece a calcular.  
 
